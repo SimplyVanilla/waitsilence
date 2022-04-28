@@ -92,11 +92,17 @@ mainloop:
 			break mainloop
 		}
 	}
+
+	rc := 0
+
 	if cmd != nil {
 		cmd.Process.Kill()
 		if !cmd.ProcessState.Success() {
 			glg.Error(cmd.ProcessState.String())
+			rc = 1
 		}
 	}
+
 	glg.Infof("%s silence achieved after %s", *timeout, time.Since(start))
+	os.Exit(rc)
 }

@@ -1,5 +1,7 @@
 # waitsilence
 
+[![goreleaser](https://github.com/SimplyVanilla/waitsilence/actions/workflows/goreleaser.yml/badge.svg)](https://github.com/SimplyVanilla/waitsilence/actions/workflows/goreleaser.yml)
+
 Delay until `stdin` has recieved no input for a specified time, and then exit.
 
 ## Options

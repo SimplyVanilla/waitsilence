@@ -21,9 +21,8 @@ package main
 import (
 	"bufio"
 	"flag"
-	"fmt"
+	"github.com/kpango/glg"
 	"io"
-	"log"
 	"net/textproto"
 	"os"
 	"os/exec"
@@ -58,8 +57,7 @@ func main() {
 			panic(err)
 		}
 		go func() {
-			err := cmd.Run()
-			log.Print("Command exited: ", err)
+			cmd.Run()
 			done <- true
 		}()
 	}
@@ -76,12 +74,11 @@ func main() {
 				break
 			}
 			if *verbose {
-				fmt.Printf("%d lines (%.2fs)\r", n, time.Since(last).Seconds())
+				glg.Debugf("%d lines (%.2fs)\r", n, time.Since(last).Seconds())
 				n++
 				last = time.Now()
 			}
 		}
-		done <- true
 	}()
 
 	start := time.Now()
@@ -95,8 +92,17 @@ mainloop:
 			break mainloop
 		}
 	}
+
+	rc := 0
+
 	if cmd != nil {
 		cmd.Process.Kill()
+		if !cmd.ProcessState.Success() {
+			glg.Error(cmd.ProcessState.String())
+			rc = 1
+		}
 	}
-	log.Printf("%s silence achieved after %s", *timeout, time.Since(start))
+
+	glg.Infof("%s silence achieved after %s", *timeout, time.Since(start))
+	os.Exit(rc)
 }

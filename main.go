@@ -26,21 +26,21 @@ import (
 	"net/textproto"
 	"os"
 	"os/exec"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
-var timeout = flag.Duration("timeout", 1*time.Second,
-	"Amount of time for which silence required before quitting")
+var timeout = flag.Duration("timeout", 1*time.Second, "Amount of time for which silence required before quitting")
 
-var cmdstr = flag.String("command", "",
-	"Command to execute and wait for silence")
+var cmdstr = flag.String("command", "", "Command to execute and wait for silence")
 
-var verbose = flag.Bool("verbose", false, "Show stderr of process, # lines "+
-	"printed")
+var verbose = flag.Bool("verbose", false, "Show stderr of process, # lines printed")
 
 func main() {
 	flag.Parse()
 
+	s := make(chan os.Signal)
 	keepalive, done := make(chan bool), make(chan bool)
 
 	var cmd *exec.Cmd
@@ -48,6 +48,8 @@ func main() {
 
 	if *cmdstr != "" {
 		cmd = exec.Command("sh", "-c", *cmdstr)
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
 		if *verbose {
 			cmd.Stderr = os.Stderr
 		}
@@ -57,10 +59,22 @@ func main() {
 			panic(err)
 		}
 		go func() {
-			cmd.Run()
+			err := cmd.Run()
+			if err != nil {
+				glg.Error("command failed")
+				os.Exit(1)
+			}
 			done <- true
 		}()
 	}
+
+	signal.Notify(s, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-s
+		syscall.Kill(-cmd.Process.Pid, syscall.SIGTERM)
+		glg.Warn("terminated")
+		os.Exit(1)
+	}()
 
 	in := textproto.NewReader(bufio.NewReader(input))
 
@@ -93,16 +107,9 @@ mainloop:
 		}
 	}
 
-	rc := 0
-
 	if cmd != nil {
-		cmd.Process.Kill()
-		if !cmd.ProcessState.Success() {
-			glg.Error(cmd.ProcessState.String())
-			rc = 1
-		}
+		syscall.Kill(-cmd.Process.Pid, syscall.SIGTERM)
 	}
 
 	glg.Infof("%s silence achieved after %s", *timeout, time.Since(start))
-	os.Exit(rc)
 }

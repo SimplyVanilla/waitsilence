@@ -1,7 +1,8 @@
 # waitsilence
 
 [![goreleaser](https://github.com/SimplyVanilla/waitsilence/actions/workflows/goreleaser.yml/badge.svg)](https://github.com/SimplyVanilla/waitsilence/actions/workflows/goreleaser.yml)
-[![Language grade: Go](https://img.shields.io/lgtm/grade/go/g/SimplyVanilla/waitsilence.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/SimplyVanilla/waitsilence/context:go)
+[![Known Vulnerabilities](https://snyk.io/test/github/SimplyVanilla/waitsilence/badge.svg)](https://snyk.io/test/github/SimplyVanilla/waitsilence)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=SimplyVanilla_waitsilence&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=SimplyVanilla_waitsilence)
 
 Delay until `stdin` has recieved no input for a specified time, and then exit.
 

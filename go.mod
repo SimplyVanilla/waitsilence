@@ -1,6 +1,6 @@
 module github.com/SimplyVanilla/waitsilence
 
-go 1.18
+go 1.21
 
 require github.com/kpango/glg v1.6.15
 
